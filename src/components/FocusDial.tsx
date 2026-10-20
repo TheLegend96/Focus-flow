@@ -21,6 +21,9 @@ interface FocusDialProps {
   sessionTitle: string;
   onUpdateTitle: (title: string) => void;
   onCompleteSession: (durationMinutes: number, title: string, category: Category) => void;
+  onOpenMusicStudio: () => void;
+  isMusicPlaying: boolean;
+  currentMusicTitle: string;
 }
 
 export const FocusDial: React.FC<FocusDialProps> = ({
@@ -30,6 +33,9 @@ export const FocusDial: React.FC<FocusDialProps> = ({
   sessionTitle,
   onUpdateTitle,
   onCompleteSession,
+  onOpenMusicStudio,
+  isMusicPlaying,
+  currentMusicTitle,
 }) => {
   // Session duration in minutes (default 25)
   const [targetDurationMinutes, setTargetDurationMinutes] = useState(25);
@@ -221,15 +227,22 @@ export const FocusDial: React.FC<FocusDialProps> = ({
         </div>
 
         <button
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          className={`p-2 rounded-lg transition ${
-            soundEnabled
-              ? 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
-              : 'text-zinc-300'
+          onClick={onOpenMusicStudio}
+          className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition ${
+            isMusicPlaying
+              ? 'bg-rose-50 text-rose-600 border border-rose-200 shadow-2xs'
+              : 'text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50'
           }`}
-          title="Toggle Ambient Sound"
+          title={isMusicPlaying ? `Now Playing: ${currentMusicTitle}` : 'Open YouTube Music Studio'}
         >
           <Music className="w-4 h-4" />
+          {isMusicPlaying && (
+            <span className="flex items-center gap-0.5">
+              <span className="w-1 h-2.5 bg-rose-500 rounded-full animate-pulse" />
+              <span className="w-1 h-3.5 bg-rose-500 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+              <span className="w-1 h-2 bg-rose-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+            </span>
+          )}
         </button>
       </div>
 

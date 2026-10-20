@@ -6,6 +6,7 @@ import { NotesPanel } from './components/NotesPanel';
 import { TimelineFeed } from './components/TimelineFeed';
 import { CalendarModal } from './components/CalendarModal';
 import { AuthModal } from './components/AuthModal';
+import { MusicPlayer, TrackPreset } from './components/MusicPlayer';
 import { Category, FocusSession, CalendarEvent } from './types';
 import { sessionService } from './services/sessionService';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
@@ -39,6 +40,18 @@ export const App: React.FC = () => {
   // Modals State
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isMusicOpen, setIsMusicOpen] = useState(false);
+
+  // Background Focus Music State
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<TrackPreset>({
+    id: 'p1',
+    title: 'Lofi Hip Hop Radio - Beats to Relax/Study',
+    artist: 'Lofi Girl',
+    videoId: 'jfKfPfyJRdk',
+    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=300&auto=format&fit=crop&q=60',
+    category: 'lofi',
+  });
   
   // Auth state
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
@@ -146,6 +159,9 @@ export const App: React.FC = () => {
             sessionTitle={sessionTitle}
             onUpdateTitle={setSessionTitle}
             onCompleteSession={handleCompleteSession}
+            onOpenMusicStudio={() => setIsMusicOpen(true)}
+            isMusicPlaying={isMusicPlaying}
+            currentMusicTitle={currentTrack.title}
           />
         </section>
 
@@ -191,6 +207,16 @@ export const App: React.FC = () => {
         onClose={() => setIsAuthOpen(false)}
         currentUser={currentUser}
         onLogout={handleLogout}
+      />
+
+      {/* Background Focus Music Studio */}
+      <MusicPlayer
+        isOpen={isMusicOpen}
+        onClose={() => setIsMusicOpen(false)}
+        isPlaying={isMusicPlaying}
+        setIsPlaying={setIsMusicPlaying}
+        currentTrack={currentTrack}
+        setCurrentTrack={setCurrentTrack}
       />
     </div>
   );
