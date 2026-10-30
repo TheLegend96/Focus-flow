@@ -203,18 +203,32 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
   const [isLoadingYouTube, setIsLoadingYouTube] = useState(false);
 
+  const [syncError, setSyncError] = useState<{ message: string; type?: string } | null>(null);
+
   // Fetch real YouTube Liked Songs & Playlists when Google token is present
   const syncYouTubeData = async () => {
     setIsLoadingYouTube(true);
+    setSyncError(null);
     const token = await youtubeService.getGoogleAccessToken();
     if (token) {
       setIsYouTubeConnected(true);
-      const [playlists, liked] = await Promise.all([
-        youtubeService.fetchUserPlaylists(token),
-        youtubeService.fetchLikedSongs(token),
-      ]);
-      if (playlists.length > 0) setUserPlaylists(playlists);
-      if (liked.length > 0) setLikedTracks(liked);
+      const res = await youtubeService.syncAll(token);
+      if (res.success) {
+        if (res.playlists.length > 0) setUserPlaylists(res.playlists);
+        if (res.likedSongs.length > 0) setLikedTracks(res.likedSongs);
+      } else {
+        if (res.errorType === 'API_NOT_ENABLED') {
+          setSyncError({
+            type: 'API_NOT_ENABLED',
+            message: 'YouTube Data API v3 needs to be enabled in your Google Cloud project.',
+          });
+        } else {
+          setSyncError({
+            type: 'NEEDS_PERMISSION',
+            message: 'Grant YouTube access to retrieve your personal playlists.',
+          });
+        }
+      }
     } else {
       const cachedP = youtubeService.getCachedPlaylists();
       const cachedL = youtubeService.getCachedLiked();
@@ -707,10 +721,34 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                         </button>
                       ))}
 
-                      {!isYouTubeConnected && (
+                      {syncError ? (
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 mt-2 text-left space-y-2">
+                          <p className="text-[11px] text-amber-200 leading-snug">
+                            {syncError.message}
+                          </p>
+                          {syncError.type === 'API_NOT_ENABLED' ? (
+                            <a
+                              href="https://console.cloud.google.com/apis/library/youtube.googleapis.com"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full py-1.5 px-2 bg-amber-500 hover:bg-amber-600 text-zinc-950 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-sm"
+                            >
+                              <span>Enable YouTube API ↗</span>
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => youtubeService.connectYouTube()}
+                              className="w-full py-1.5 px-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+                            >
+                              <span>Grant Permission</span>
+                            </button>
+                          )}
+                        </div>
+                      ) : !isYouTubeConnected ? (
                         <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 mt-2 text-left">
                           <p className="text-[11px] text-zinc-300 leading-snug mb-2">
-                            Connect your Google Account to sync your YouTube Liked Songs & playlists.
+                            Sign in with Google to retrieve your YouTube Music playlists & Liked Songs.
                           </p>
                           <button
                             type="button"
@@ -720,7 +758,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                             <span>Connect YouTube</span>
                           </button>
                         </div>
-                      )}
+                      ) : null}
 
                       <button
                         onClick={() => {
