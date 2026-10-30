@@ -31,6 +31,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
+          scopes: 'https://www.googleapis.com/auth/youtube.readonly',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
       if (error) throw error;

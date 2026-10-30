@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { youtubeService } from '../services/youtubeService';
 import {
   X,
   Play,
@@ -20,7 +21,8 @@ import {
   Minimize2,
   Maximize2,
   Flame,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 
 export interface TrackItem {
@@ -180,7 +182,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   currentTrack,
   setCurrentTrack,
 }) => {
-  const [activeNav, setActiveNav] = useState<'listen-now' | 'browse' | 'radio' | 'library' | 'custom'>('listen-now');
+  const [activeNav, setActiveNav] = useState<'listen-now' | 'browse' | 'radio' | 'library' | 'liked' | 'custom'>('listen-now');
   const [searchQuery, setSearchQuery] = useState('');
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
@@ -194,6 +196,39 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [customLinkInput, setCustomLinkInput] = useState('');
   const [isGlassExpanded, setIsGlassExpanded] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistCollection | null>(null);
+
+  // Real YouTube Data API state
+  const [userPlaylists, setUserPlaylists] = useState<PlaylistCollection[]>(CURATED_PLAYLISTS);
+  const [likedTracks, setLikedTracks] = useState<TrackItem[]>(FEATURED_TRACKS.slice(0, 4));
+  const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
+  const [isLoadingYouTube, setIsLoadingYouTube] = useState(false);
+
+  // Fetch real YouTube Liked Songs & Playlists when Google token is present
+  const syncYouTubeData = async () => {
+    setIsLoadingYouTube(true);
+    const token = await youtubeService.getGoogleAccessToken();
+    if (token) {
+      setIsYouTubeConnected(true);
+      const [playlists, liked] = await Promise.all([
+        youtubeService.fetchUserPlaylists(token),
+        youtubeService.fetchLikedSongs(token),
+      ]);
+      if (playlists.length > 0) setUserPlaylists(playlists);
+      if (liked.length > 0) setLikedTracks(liked);
+    } else {
+      const cachedP = youtubeService.getCachedPlaylists();
+      const cachedL = youtubeService.getCachedLiked();
+      if (cachedP.length > 0) setUserPlaylists(cachedP);
+      if (cachedL.length > 0) setLikedTracks(cachedL);
+    }
+    setIsLoadingYouTube(false);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      syncYouTubeData();
+    }
+  }, [isOpen]);
 
   // Playback timer simulator for smooth scrubber movement
   useEffect(() => {
@@ -613,13 +648,43 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                       <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                         YouTube Music
                       </span>
-                      <span className="text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-500/20">
-                        Synced
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {isLoadingYouTube && (
+                          <RefreshCw className="w-3 h-3 text-zinc-400 animate-spin" />
+                        )}
+                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-md border ${
+                          isYouTubeConnected
+                            ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                            : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                        }`}>
+                          {isYouTubeConnected ? 'Connected' : 'Offline'}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="space-y-1">
-                      {CURATED_PLAYLISTS.map((pl) => (
+                      {/* Liked Songs Button */}
+                      <button
+                        onClick={() => {
+                          setActiveNav('liked');
+                          setSelectedPlaylist(null);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition text-left truncate ${
+                          activeNav === 'liked'
+                            ? 'bg-rose-500 text-white shadow-sm'
+                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <Heart className="w-3.5 h-3.5 text-rose-400 fill-current shrink-0" />
+                          <span className="truncate">Liked Songs</span>
+                        </div>
+                        <span className="text-[10px] opacity-75 shrink-0">
+                          {likedTracks.length}
+                        </span>
+                      </button>
+
+                      {userPlaylists.map((pl) => (
                         <button
                           key={pl.id}
                           onClick={() => {
@@ -641,6 +706,21 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                           </span>
                         </button>
                       ))}
+
+                      {!isYouTubeConnected && (
+                        <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 mt-2 text-left">
+                          <p className="text-[11px] text-zinc-300 leading-snug mb-2">
+                            Connect your Google Account to sync your YouTube Liked Songs & playlists.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => youtubeService.connectYouTube()}
+                            className="w-full py-1.5 px-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+                          >
+                            <span>Connect YouTube</span>
+                          </button>
+                        </div>
+                      )}
 
                       <button
                         onClick={() => {
@@ -724,6 +804,99 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                       </div>
 
                       {selectedPlaylist.tracks.map((track, i) => {
+                        const isCurrent = currentTrack.id === track.id;
+                        return (
+                          <div
+                            key={track.id}
+                            onClick={() => handlePlayTrack(track)}
+                            className={`grid grid-cols-12 items-center px-4 py-2.5 rounded-xl cursor-pointer transition group ${
+                              isCurrent
+                                ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                                : 'hover:bg-white/5 text-zinc-300'
+                            }`}
+                          >
+                            <span className="col-span-1 text-xs text-zinc-500 group-hover:text-white">
+                              {isCurrent && isPlaying ? (
+                                <Disc3 className="w-3.5 h-3.5 text-rose-400 animate-spin" />
+                              ) : (
+                                i + 1
+                              )}
+                            </span>
+                            <div className="col-span-6 flex items-center gap-3 min-w-0">
+                              <img
+                                src={track.coverUrl}
+                                alt={track.title}
+                                className="w-9 h-9 rounded-lg object-cover shrink-0 border border-white/10"
+                              />
+                              <div className="min-w-0">
+                                <div className={`text-xs font-semibold truncate ${isCurrent ? 'text-rose-400' : 'text-zinc-100 group-hover:text-white'}`}>
+                                  {track.title}
+                                </div>
+                                <div className="text-[11px] text-zinc-400 truncate">
+                                  {track.artist}
+                                </div>
+                              </div>
+                            </div>
+                            <span className="col-span-3 text-xs text-zinc-400 truncate">
+                              {track.album || track.genre}
+                            </span>
+                            <span className="col-span-2 text-right text-xs text-zinc-400 font-mono">
+                              {track.duration}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : activeNav === 'liked' ? (
+                  /* 2. LIKED SONGS VIEW (Apple Music Favorite Tracks) */
+                  <div className="space-y-6">
+                    {/* Hero Header */}
+                    <div className="flex items-end gap-6 p-6 rounded-3xl bg-gradient-to-t from-rose-950/40 via-purple-950/20 to-transparent border border-white/10">
+                      <div className="w-44 h-44 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-2xl border border-white/20 shrink-0">
+                        <Heart className="w-20 h-20 text-white fill-current" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400">
+                          Auto Playlist • YouTube Music
+                        </span>
+                        <h1 className="text-3xl font-bold text-white tracking-tight">
+                          Liked Songs
+                        </h1>
+                        <p className="text-xs text-zinc-300 leading-relaxed max-w-xl">
+                          Your synchronized liked music and saved tracks from YouTube & YouTube Music.
+                        </p>
+                        <div className="flex items-center gap-3 pt-2">
+                          <button
+                            onClick={() => handlePlayTrack(likedTracks[0])}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs transition shadow-lg active:scale-95"
+                          >
+                            <Play className="w-4 h-4 fill-current" />
+                            <span>Play All ({likedTracks.length})</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={syncYouTubeData}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs text-zinc-300 font-medium transition"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${isLoadingYouTube ? 'animate-spin' : ''}`} />
+                            <span>Refresh from YouTube</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Track Table */}
+                    <div className="space-y-1">
+                      <div className="grid grid-cols-12 text-[11px] font-bold text-zinc-500 uppercase px-4 py-2 border-b border-white/10">
+                        <span className="col-span-1">#</span>
+                        <span className="col-span-6">Title</span>
+                        <span className="col-span-3">Channel / Album</span>
+                        <span className="col-span-2 text-right">Time</span>
+                      </div>
+
+                      {likedTracks.map((track, i) => {
                         const isCurrent = currentTrack.id === track.id;
                         return (
                           <div
