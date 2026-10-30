@@ -1,16 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   X,
   Play,
   Pause,
-  Volume2,
-  VolumeX,
   Radio,
   ListMusic,
   Link2,
   Disc3,
   Sparkles,
-  Music2
+  Music2,
+  Minimize2,
+  Maximize2
 } from 'lucide-react';
 
 export interface TrackPreset {
@@ -66,7 +66,6 @@ const PRESET_TRACKS: TrackPreset[] = [
   },
 ];
 
-// Sample YouTube Music user playlists for simulation and demonstration
 const SAMPLE_USER_PLAYLISTS = [
   {
     id: 'upl1',
@@ -112,19 +111,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   setCurrentTrack,
 }) => {
   const [activeTab, setActiveTab] = useState<'presets' | 'playlists' | 'custom'>('presets');
-  const [volume, setVolume] = useState(70);
-  const [isMuted, setIsMuted] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
   const [customError, setCustomError] = useState('');
-  
-  // Ref for the hidden YouTube iframe
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [isMiniPlayerExpanded, setIsMiniPlayerExpanded] = useState(false);
 
-  // Extract YouTube Video or Playlist ID from URL
   const extractYouTubeId = (url: string) => {
-    // Check for playlist
     const playlistMatch = url.match(/[?&]list=([^#&?]+)/);
-    // Check for standard video watch
     const videoMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
     return {
       playlistId: playlistMatch ? playlistMatch[1] : null,
@@ -166,7 +158,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       id: pl.id,
       title: pl.title,
       artist: 'YouTube Music Playlist',
-      videoId: 'jfKfPfyJRdk', // Default audio anchor
+      videoId: 'jfKfPfyJRdk',
       playlistId: pl.playlistId,
       coverUrl: pl.coverUrl,
       category: 'lofi',
@@ -174,29 +166,81 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     setIsPlaying(true);
   };
 
-  // Build the embed URL with autoplay parameters
-  const embedUrl = currentTrack.playlistId
-    ? `https://www.youtube.com/embed/videoseries?list=${currentTrack.playlistId}&autoplay=${isPlaying ? '1' : '0'}&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
-    : `https://www.youtube.com/embed/${currentTrack.videoId}?autoplay=${isPlaying ? '1' : '0'}&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
+  // Embed URL for YouTube Iframe
+  const embedSrc = currentTrack.playlistId
+    ? `https://www.youtube.com/embed/videoseries?list=${currentTrack.playlistId}&autoplay=1`
+    : `https://www.youtube.com/embed/${currentTrack.videoId}?autoplay=1`;
 
   return (
     <>
-      {/* 1. Permanent Hidden YouTube Player Iframe (Keeps playing even when modal is closed!) */}
-      <div className="fixed -bottom-96 -right-96 opacity-0 pointer-events-none w-1 h-1 overflow-hidden">
-        {isPlaying && (
-          <iframe
-            ref={iframeRef}
-            key={`${currentTrack.videoId}-${currentTrack.playlistId}-${isPlaying}`}
-            width="200"
-            height="200"
-            src={embedUrl}
-            title="FocusFlow YouTube Player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          />
-        )}
-      </div>
+      {/* 1. Docked Floating Mini Player (Always visible in bottom left when playing, fully audible & never blocked by Chrome) */}
+      {isPlaying && (
+        <aside
+          aria-label="Active music playback"
+          className="fixed bottom-4 left-20 z-40 bg-zinc-900 text-white rounded-2xl shadow-xl border border-zinc-800 p-2.5 transition-all flex flex-col gap-2 max-w-xs"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-zinc-700">
+                <img
+                  src={currentTrack.coverUrl}
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <Disc3 className="w-4 h-4 text-rose-400 animate-spin" style={{ animationDuration: '3s' }} />
+                </div>
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-zinc-100 truncate max-w-[130px]">
+                  {currentTrack.title}
+                </div>
+                <div className="text-[10px] text-zinc-400 truncate max-w-[130px]">
+                  {currentTrack.artist}
+                </div>
+              </div>
+            </div>
 
-      {/* 2. Interactive Studio Modal UI */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsMiniPlayerExpanded(!isMiniPlayerExpanded)}
+                className="p-1 text-zinc-400 hover:text-white rounded transition"
+                title={isMiniPlayerExpanded ? 'Hide video' : 'Show video'}
+              >
+                {isMiniPlayerExpanded ? (
+                  <Minimize2 className="w-3.5 h-3.5" />
+                ) : (
+                  <Maximize2 className="w-3.5 h-3.5" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPlaying(false)}
+                className="w-7 h-7 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition active:scale-95"
+                title="Pause playback"
+              >
+                <Pause className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* YouTube Video / Audio Frame */}
+          <div className={`${isMiniPlayerExpanded ? 'block w-64 h-36 mt-1 rounded-xl overflow-hidden border border-zinc-800' : 'w-48 h-10 opacity-90 rounded-lg overflow-hidden'}`}>
+            <iframe
+              key={`${currentTrack.videoId}-${currentTrack.playlistId}`}
+              width="100%"
+              height="100%"
+              src={embedSrc}
+              title="FocusFlow Music Player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              className="w-full h-full border-0"
+            />
+          </div>
+        </aside>
+      )}
+
+      {/* 2. Full Studio Modal */}
       {isOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150"
@@ -226,6 +270,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </div>
 
               <button
+                type="button"
                 onClick={onClose}
                 className="text-zinc-400 hover:text-zinc-600 p-1 rounded-lg transition"
               >
@@ -233,7 +278,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </button>
             </div>
 
-            {/* Now Playing Bar */}
+            {/* Now Playing Bar in Modal */}
             <div className="my-4 p-3.5 rounded-2xl bg-zinc-900 text-white flex items-center justify-between shadow-md">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-zinc-700">
@@ -259,10 +304,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                 </div>
               </div>
 
-              {/* Player Controls */}
-              <div className="flex items-center gap-4 shrink-0 pl-3">
-                {/* Play / Pause Toggle */}
+              {/* Controls */}
+              <div className="flex items-center gap-3 shrink-0 pl-3">
                 <button
+                  type="button"
                   onClick={() => setIsPlaying(!isPlaying)}
                   className="w-10 h-10 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-sm transition active:scale-95"
                   title={isPlaying ? 'Pause' : 'Play'}
@@ -273,37 +318,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                     <Play className="w-4 h-4 ml-0.5" />
                   )}
                 </button>
-
-                {/* Volume Slider */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="text-zinc-400 hover:text-zinc-200"
-                  >
-                    {isMuted || volume === 0 ? (
-                      <VolumeX className="w-4 h-4" />
-                    ) : (
-                      <Volume2 className="w-4 h-4" />
-                    )}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={isMuted ? 0 : volume}
-                    onChange={(e) => {
-                      setVolume(Number(e.target.value));
-                      setIsMuted(false);
-                    }}
-                    className="w-16 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-rose-500"
-                  />
-                </div>
               </div>
             </div>
 
             {/* Navigation Tabs */}
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-2">
               <button
+                type="button"
                 onClick={() => setActiveTab('presets')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                   activeTab === 'presets'
@@ -316,6 +337,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </button>
 
               <button
+                type="button"
                 onClick={() => setActiveTab('playlists')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                   activeTab === 'playlists'
@@ -328,6 +350,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </button>
 
               <button
+                type="button"
                 onClick={() => setActiveTab('custom')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                   activeTab === 'custom'
@@ -340,13 +363,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </button>
             </div>
 
-            {/* Tab Contents (Scrollable) */}
+            {/* Tab Contents */}
             <div className="flex-1 overflow-y-auto py-3 space-y-2.5">
-              {/* Tab 1: Presets */}
               {activeTab === 'presets' && (
                 <div className="space-y-2">
                   <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                    Handpicked Focus Radios (Ad-Free Flow)
+                    Handpicked Focus Radios
                   </div>
                   {PRESET_TRACKS.map((t) => {
                     const isSelected = currentTrack.videoId === t.videoId;
@@ -396,7 +418,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                 </div>
               )}
 
-              {/* Tab 2: User YouTube Playlists */}
               {activeTab === 'playlists' && (
                 <div className="space-y-3">
                   <div className="p-3 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-between">
@@ -452,7 +473,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                 </div>
               )}
 
-              {/* Tab 3: Custom YouTube URL */}
               {activeTab === 'custom' && (
                 <div className="space-y-4 pt-1">
                   <div className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50/50">
@@ -491,10 +511,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               )}
             </div>
 
-            {/* Footer Notice */}
+            {/* Footer */}
             <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400">
-              <span>Music continues playing in background while timer runs</span>
+              <span>Docked mini-player stays active while your focus timer runs</span>
               <button
+                type="button"
                 onClick={onClose}
                 className="text-zinc-600 hover:text-zinc-900 font-semibold"
               >
