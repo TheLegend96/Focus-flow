@@ -45,12 +45,14 @@ export const App: React.FC = () => {
   // Background Focus Music State
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<TrackPreset>({
-    id: 'p1',
-    title: 'Lofi Hip Hop Radio - Beats to Relax/Study',
+    id: 'f1',
+    title: 'Lofi Hip Hop Radio — Beats to Relax/Study',
     artist: 'Lofi Girl',
+    album: 'Lofi Beats Session',
+    duration: '3:45',
     videoId: 'jfKfPfyJRdk',
-    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=300&auto=format&fit=crop&q=60',
-    category: 'lofi',
+    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80',
+    genre: 'Lo-Fi Chill',
   });
   
   // Auth state
