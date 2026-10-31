@@ -45,14 +45,15 @@ export const App: React.FC = () => {
   // Background Focus Music State
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<TrackPreset>({
-    id: 'f1',
-    title: 'Lofi Hip Hop Radio — Beats to Relax/Study',
-    artist: 'Lofi Girl',
-    album: 'Lofi Beats Session',
-    duration: '3:45',
-    videoId: 'jfKfPfyJRdk',
-    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80',
-    genre: 'Lo-Fi Chill',
+    id: 'lp-1',
+    title: 'BURN IT DOWN',
+    artist: 'LINKIN PARK',
+    album: 'LIVING THINGS',
+    duration: '3:51',
+    durationSec: 231,
+    videoId: 'dxytyRy-yo8',
+    coverUrl: 'https://i.ytimg.com/vi/dxytyRy-yo8/hqdefault.jpg',
+    genre: 'Hard Rock',
   });
   
   // Auth state
