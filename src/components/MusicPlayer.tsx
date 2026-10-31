@@ -13,16 +13,21 @@ import {
   Repeat,
   Heart,
   Search,
-  ListMusic,
-  Radio,
-  Compass,
-  Sparkles,
-  Disc3,
-  Minimize2,
-  Maximize2,
+  Home,
   Flame,
-  Plus,
-  RefreshCw
+  Sparkles,
+  Library,
+  ChevronLeft,
+  ChevronRight,
+  Airplay,
+  ListMusic,
+  RefreshCw,
+  Zap,
+  Smile,
+  Droplets,
+  HeartCrack,
+  Wind,
+  Target
 } from 'lucide-react';
 
 export interface TrackItem {
@@ -40,6 +45,24 @@ export interface TrackItem {
 
 export type TrackPreset = TrackItem;
 
+export interface MoodCard {
+  id: string;
+  title: string;
+  description: string;
+  gradient: string;
+  icon: React.ReactNode;
+  track: TrackItem;
+}
+
+export interface EssentialCard {
+  id: string;
+  title: string;
+  genre: string;
+  artist: string;
+  coverUrl: string;
+  track: TrackItem;
+}
+
 export interface PlaylistCollection {
   id: string;
   title: string;
@@ -49,70 +72,236 @@ export interface PlaylistCollection {
   tracks: TrackItem[];
 }
 
-const FEATURED_TRACKS: TrackItem[] = [
+// 1. Mood Cards (from reference image: Energy, Love, Feel Good, Feeling Blue, Heartbreak, Relax, Focus)
+const MOOD_CARDS: MoodCard[] = [
   {
-    id: 'f1',
-    title: 'Lofi Hip Hop Radio — Beats to Relax/Study',
-    artist: 'Lofi Girl',
-    album: 'Lofi Beats Session',
-    duration: '3:45',
-    videoId: 'jfKfPfyJRdk',
-    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80',
-    genre: 'Lo-Fi Chill',
+    id: 'mood-focus',
+    title: 'Focus',
+    description: 'Limitless music to help stay in the zone.',
+    gradient: 'from-teal-400 via-cyan-500 to-emerald-500',
+    icon: <Target className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-focus',
+      title: 'Deep Focus (Alpha Waves 40Hz for Mental Clarity)',
+      artist: 'Brain Wave Collective',
+      album: 'Apple Music Focus',
+      duration: '4:20',
+      videoId: 'WPni755-Krg',
+      coverUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
+      genre: 'Focus',
+    },
   },
   {
-    id: 'f2',
-    title: 'Deep Focus (Alpha Waves 40Hz for Mental Clarity)',
-    artist: 'Brain Wave Collective',
-    album: 'Cognitive Architecture',
-    duration: '4:20',
-    videoId: 'WPni755-Krg',
-    coverUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
-    genre: 'Ambient Alpha',
+    id: 'mood-relax',
+    title: 'Relax',
+    description: 'Soothing sounds to help you unwind and breathe easily.',
+    gradient: 'from-cyan-400 via-blue-500 to-indigo-500',
+    icon: <Wind className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-relax',
+      title: 'Rainy Cafe in Kyoto — Ambient Jazz & Piano',
+      artist: 'Coffee Cozy Records',
+      album: 'Apple Music Chill',
+      duration: '3:50',
+      videoId: 'e3L1I71DwfA',
+      coverUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
+      genre: 'Acoustic Jazz',
+    },
   },
   {
-    id: 'f3',
-    title: 'Synthwave / Cyberpunk Coding Mix 2026',
-    artist: 'ChillSynth Radio',
-    album: 'Night City Overdrive',
-    duration: '5:12',
-    videoId: '4xDzrJKXOOY',
-    coverUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
-    genre: 'Synthwave',
+    id: 'mood-energy',
+    title: 'Energy',
+    description: 'Keep it moving with non-stop high-voltage tracks.',
+    gradient: 'from-emerald-400 via-teal-500 to-green-600',
+    icon: <Zap className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-energy',
+      title: 'Synthwave / Cyberpunk Coding Mix 2026',
+      artist: 'ChillSynth Radio',
+      album: 'Apple Music Electronic',
+      duration: '5:12',
+      videoId: '4xDzrJKXOOY',
+      coverUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
+      genre: 'High Voltage',
+    },
   },
   {
-    id: 'f4',
-    title: 'Rainy Cafe in Kyoto — Ambient Jazz & Piano',
-    artist: 'Coffee Cozy Records',
-    album: 'Raindrops on Concrete',
-    duration: '3:50',
-    videoId: 'e3L1I71DwfA',
-    coverUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
-    genre: 'Acoustic Jazz',
+    id: 'mood-feelgood',
+    title: 'Feel Good',
+    description: 'The most uplifting tracks to brighten your day.',
+    gradient: 'from-amber-400 via-orange-500 to-yellow-500',
+    icon: <Smile className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-feelgood',
+      title: 'Lofi Hip Hop Radio — Beats to Relax/Study',
+      artist: 'Lofi Girl',
+      album: 'Apple Music Lofi',
+      duration: '3:45',
+      videoId: 'jfKfPfyJRdk',
+      coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80',
+      genre: 'Feel Good Chill',
+    },
   },
   {
-    id: 'f5',
-    title: 'Peaceful Piano Masterpieces for Deep Work',
-    artist: 'Ludovico Ensemble',
-    album: 'Reflections & Solitude',
-    duration: '4:05',
-    videoId: 'lTRiuFIWV54',
-    coverUrl: 'https://images.unsplash.com/photo-1520523839898-50712825e3a7?w=600&auto=format&fit=crop&q=80',
-    genre: 'Classical Piano',
+    id: 'mood-blue',
+    title: 'Feeling Blue',
+    description: 'Sad songs that understand exactly how you feel.',
+    gradient: 'from-blue-600 via-indigo-700 to-slate-800',
+    icon: <Droplets className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-blue',
+      title: 'Peaceful Piano Masterpieces for Deep Work',
+      artist: 'Ludovico Ensemble',
+      album: 'Apple Music Piano',
+      duration: '4:05',
+      videoId: 'lTRiuFIWV54',
+      coverUrl: 'https://images.unsplash.com/photo-1520523839898-50712825e3a7?w=600&auto=format&fit=crop&q=80',
+      genre: 'Melancholy',
+    },
   },
   {
-    id: 'f6',
-    title: 'Interstellar Deep Space Ambience',
-    artist: 'Cosmos Soundscapes',
-    album: 'Orbital Resonance',
-    duration: '6:15',
-    videoId: 'tNkZsRW7h2c',
-    coverUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80',
-    genre: 'Space Ambient',
+    id: 'mood-love',
+    title: 'Love',
+    description: 'Romantic music that captures the perfect mood.',
+    gradient: 'from-fuchsia-500 via-purple-600 to-pink-500',
+    icon: <Heart className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-love',
+      title: 'Acoustic Guitar Sessions & Warm Melodies',
+      artist: 'Soleil Acoustic',
+      album: 'Apple Music Acoustic',
+      duration: '3:32',
+      videoId: 'e3L1I71DwfA',
+      coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+      genre: 'Warm Acoustic',
+    },
+  },
+  {
+    id: 'mood-heartbreak',
+    title: 'Heartbreak',
+    description: 'Get over it, one tear-jerking anthem at a time.',
+    gradient: 'from-indigo-400 via-purple-500 to-violet-600',
+    icon: <HeartCrack className="w-12 h-12 text-white stroke-[1.75]" />,
+    track: {
+      id: 'm-heartbreak',
+      title: 'Interstellar Deep Space Soundscape',
+      artist: 'Cosmos Sound',
+      album: 'Apple Music Space',
+      duration: '6:15',
+      videoId: 'tNkZsRW7h2c',
+      coverUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80',
+      genre: 'Reflective',
+    },
   },
 ];
 
-const CURATED_PLAYLISTS: PlaylistCollection[] = [
+// 2. Essentials Row (from reference image: Linkin Park, The Weeknd, Post Malone, Bad Bunny, Joji, etc.)
+const ESSENTIALS_LIST: EssentialCard[] = [
+  {
+    id: 'ess-linkin',
+    title: 'LINKIN PARK Essentials',
+    genre: 'Apple Music Hard Rock',
+    artist: 'LINKIN PARK',
+    coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80',
+    track: {
+      id: 't-lp',
+      title: 'BURN IT DOWN',
+      artist: 'LINKIN PARK',
+      album: 'LIVING THINGS',
+      duration: '3:51',
+      videoId: 'dxytyRy-yo8',
+      coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80',
+      genre: 'Hard Rock',
+    },
+  },
+  {
+    id: 'ess-weeknd',
+    title: 'The Weeknd Essentials',
+    genre: 'Apple Music R&B',
+    artist: 'The Weeknd',
+    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80',
+    track: {
+      id: 't-weeknd',
+      title: 'Blinding Lights',
+      artist: 'The Weeknd',
+      album: 'After Hours',
+      duration: '3:20',
+      videoId: '4NRXx6U8ABQ',
+      coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80',
+      genre: 'R&B / Synthpop',
+    },
+  },
+  {
+    id: 'ess-lofi',
+    title: 'Lofi Girl Essentials',
+    genre: 'Apple Music Lo-Fi',
+    artist: 'Lofi Girl',
+    coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&auto=format&fit=crop&q=80',
+    track: {
+      id: 't-lofi',
+      title: 'Lofi Hip Hop Radio — Beats to Relax/Study',
+      artist: 'Lofi Girl',
+      album: 'Lofi Chill Session',
+      duration: '3:45',
+      videoId: 'jfKfPfyJRdk',
+      coverUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&auto=format&fit=crop&q=80',
+      genre: 'Lo-Fi',
+    },
+  },
+  {
+    id: 'ess-post',
+    title: 'Post Malone Essentials',
+    genre: 'Apple Music Hip-Hop',
+    artist: 'Post Malone',
+    coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80',
+    track: {
+      id: 't-post',
+      title: 'Circles',
+      artist: 'Post Malone',
+      album: "Hollywood's Bleeding",
+      duration: '3:35',
+      videoId: 'wXhTHyIgQ_U',
+      coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80',
+      genre: 'Hip-Hop',
+    },
+  },
+  {
+    id: 'ess-piano',
+    title: 'Modern Classical Piano',
+    genre: 'Apple Music Classical',
+    artist: 'Ludovico Ensemble',
+    coverUrl: 'https://images.unsplash.com/photo-1520523839898-50712825e3a7?w=500&auto=format&fit=crop&q=80',
+    track: {
+      id: 't-piano',
+      title: 'Nuvole Bianche (Deep Flow Edition)',
+      artist: 'Ludovico Ensemble',
+      album: 'Reflections',
+      duration: '4:05',
+      videoId: 'lTRiuFIWV54',
+      coverUrl: 'https://images.unsplash.com/photo-1520523839898-50712825e3a7?w=500&auto=format&fit=crop&q=80',
+      genre: 'Modern Classical',
+    },
+  },
+  {
+    id: 'ess-badbunny',
+    title: 'Bad Bunny Essentials',
+    genre: 'Apple Music Urbano Latino',
+    artist: 'Bad Bunny',
+    coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80',
+    track: {
+      id: 't-bb',
+      title: 'Monaco',
+      artist: 'Bad Bunny',
+      album: 'Nadie Sabe Lo Que Va a Pasar',
+      duration: '4:27',
+      videoId: 'dxytyRy-yo8',
+      coverUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80',
+      genre: 'Urbano Latino',
+    },
+  },
+];
+
+const INITIAL_PLAYLISTS: PlaylistCollection[] = [
   {
     id: 'pl-coding',
     title: 'Deep Coding & Flow',
@@ -120,10 +309,9 @@ const CURATED_PLAYLISTS: PlaylistCollection[] = [
     coverUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80',
     tracksCount: 42,
     tracks: [
-      FEATURED_TRACKS[2],
-      FEATURED_TRACKS[1],
-      FEATURED_TRACKS[0],
-      FEATURED_TRACKS[5],
+      MOOD_CARDS[0].track,
+      MOOD_CARDS[1].track,
+      MOOD_CARDS[2].track,
     ],
   },
   {
@@ -133,34 +321,9 @@ const CURATED_PLAYLISTS: PlaylistCollection[] = [
     coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
     tracksCount: 58,
     tracks: [
-      FEATURED_TRACKS[0],
-      FEATURED_TRACKS[3],
-      FEATURED_TRACKS[4],
-    ],
-  },
-  {
-    id: 'pl-ambient',
-    title: 'Pure Focus & Neural Clarity',
-    description: 'Binaural frequencies, atmospheric soundscapes, and uninterrupted flow states.',
-    coverUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80',
-    tracksCount: 36,
-    tracks: [
-      FEATURED_TRACKS[1],
-      FEATURED_TRACKS[4],
-      FEATURED_TRACKS[5],
-      FEATURED_TRACKS[2],
-    ],
-  },
-  {
-    id: 'pl-classical',
-    title: 'Minimalist Modern Piano',
-    description: 'Intimate felt piano and subtle orchestral textures for deep writing.',
-    coverUrl: 'https://images.unsplash.com/photo-1520523839898-50712825e3a7?w=600&auto=format&fit=crop&q=80',
-    tracksCount: 29,
-    tracks: [
-      FEATURED_TRACKS[4],
-      FEATURED_TRACKS[3],
-      FEATURED_TRACKS[1],
+      MOOD_CARDS[3].track,
+      MOOD_CARDS[1].track,
+      MOOD_CARDS[4].track,
     ],
   },
 ];
@@ -182,30 +345,30 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   currentTrack,
   setCurrentTrack,
 }) => {
-  const [activeNav, setActiveNav] = useState<'listen-now' | 'browse' | 'radio' | 'library' | 'liked' | 'custom'>('listen-now');
+  const [activeTab, setActiveTab] = useState<'home' | 'moods' | 'essentials' | 'library' | 'search'>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
-  const [progressSec, setProgressSec] = useState(38);
+  const [progressSec, setProgressSec] = useState(24);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({
-    f1: true,
-    f2: true,
+    't-lp': true,
+    'm-focus': true,
   });
   const [customLinkInput, setCustomLinkInput] = useState('');
-  const [isGlassExpanded, setIsGlassExpanded] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistCollection | null>(null);
 
-  // Real YouTube Data API state
-  const [userPlaylists, setUserPlaylists] = useState<PlaylistCollection[]>(CURATED_PLAYLISTS);
-  const [likedTracks, setLikedTracks] = useState<TrackItem[]>(FEATURED_TRACKS.slice(0, 4));
+  // Real YouTube Data API sync state
+  const [userPlaylists, setUserPlaylists] = useState<PlaylistCollection[]>(INITIAL_PLAYLISTS);
+  const [likedTracks, setLikedTracks] = useState<TrackItem[]>([
+    ESSENTIALS_LIST[0].track,
+    MOOD_CARDS[0].track,
+  ]);
   const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
   const [isLoadingYouTube, setIsLoadingYouTube] = useState(false);
-
   const [syncError, setSyncError] = useState<{ message: string; type?: string } | null>(null);
 
-  // Fetch real YouTube Liked Songs & Playlists when Google token is present
   const syncYouTubeData = async () => {
     setIsLoadingYouTube(true);
     setSyncError(null);
@@ -220,7 +383,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         if (res.errorType === 'API_NOT_ENABLED') {
           setSyncError({
             type: 'API_NOT_ENABLED',
-            message: 'YouTube Data API v3 needs to be enabled in your Google Cloud project.',
+            message: 'YouTube Data API v3 needs to be enabled in your Google Cloud Console.',
           });
         } else {
           setSyncError({
@@ -244,12 +407,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   }, [isOpen]);
 
-  // Playback timer simulator for smooth scrubber movement
+  // Scrubber simulator
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isPlaying) {
       interval = setInterval(() => {
-        setProgressSec((prev) => (prev >= 240 ? 0 : prev + 1));
+        setProgressSec((prev) => (prev >= 231 ? 0 : prev + 1));
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -266,22 +429,23 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleSkipNext = () => {
-    const currentIndex = FEATURED_TRACKS.findIndex((t) => t.id === currentTrack.id);
-    const nextIndex = (currentIndex + 1) % FEATURED_TRACKS.length;
-    handlePlayTrack(FEATURED_TRACKS[nextIndex]);
+    const list = [...MOOD_CARDS.map((m) => m.track), ...ESSENTIALS_LIST.map((e) => e.track)];
+    const currentIndex = list.findIndex((t) => t.id === currentTrack.id);
+    const nextIndex = (currentIndex + 1) % list.length;
+    handlePlayTrack(list[nextIndex]);
   };
 
   const handleSkipPrev = () => {
-    const currentIndex = FEATURED_TRACKS.findIndex((t) => t.id === currentTrack.id);
-    const prevIndex = currentIndex <= 0 ? FEATURED_TRACKS.length - 1 : currentIndex - 1;
-    handlePlayTrack(FEATURED_TRACKS[prevIndex]);
+    const list = [...MOOD_CARDS.map((m) => m.track), ...ESSENTIALS_LIST.map((e) => e.track)];
+    const currentIndex = list.findIndex((t) => t.id === currentTrack.id);
+    const prevIndex = currentIndex <= 0 ? list.length - 1 : currentIndex - 1;
+    handlePlayTrack(list[prevIndex]);
   };
 
   const handleCustomLink = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customLinkInput.trim()) return;
 
-    // Parse URL
     const listMatch = customLinkInput.match(/[?&]list=([^#&?]+)/);
     const videoMatch = customLinkInput.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
 
@@ -313,7 +477,8 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     : `https://www.youtube.com/embed/${currentTrack.videoId}?autoplay=1`;
 
   // Search filter
-  const displayedTracks = FEATURED_TRACKS.filter((t) => {
+  const allTracks = [...MOOD_CARDS.map((m) => m.track), ...ESSENTIALS_LIST.map((e) => e.track), ...likedTracks];
+  const searchResults = allTracks.filter((t) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -325,76 +490,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   return (
     <>
-      {/* 1. Permanent Docked Glass Mini Player (Floats in corner while user works) */}
-      {isPlaying && !isOpen && (
-        <aside
-          aria-label="Apple Music Glass Mini Player"
-          className="fixed bottom-5 left-20 z-40 backdrop-blur-2xl bg-zinc-950/75 text-white rounded-2xl shadow-2xl border border-white/10 p-2.5 flex items-center gap-3 transition-all animate-in fade-in slide-in-from-bottom-3 hover:bg-zinc-950/85"
-        >
-          {/* Subtle Ambient Backlight Glow from Album Cover */}
-          <div
-            className="absolute -inset-1 rounded-2xl opacity-25 blur-lg -z-10"
-            style={{
-              backgroundImage: `radial-gradient(circle, #f43f5e 0%, transparent 70%)`,
-            }}
-          />
-
-          <div
-            onClick={onClose}
-            className="flex items-center gap-2.5 min-w-0 cursor-pointer group"
-          >
-            <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-white/10 shadow-sm">
-              <img
-                src={currentTrack.coverUrl}
-                alt={currentTrack.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                <Disc3 className="w-4 h-4 text-rose-400 animate-spin" style={{ animationDuration: '3.5s' }} />
-              </div>
-            </div>
-
-            <div className="min-w-0">
-              <div className="text-xs font-semibold text-zinc-100 truncate max-w-[125px] group-hover:text-rose-400 transition">
-                {currentTrack.title}
-              </div>
-              <div className="text-[10px] text-zinc-400 truncate max-w-[125px]">
-                {currentTrack.artist}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Mini Controls */}
-          <div className="flex items-center gap-1 shrink-0 border-l border-white/10 pl-2">
-            <button
-              type="button"
-              onClick={handleSkipPrev}
-              className="p-1 text-zinc-400 hover:text-white transition"
-              title="Previous"
-            >
-              <SkipBack className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-7 h-7 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-sm active:scale-95"
-              title={isPlaying ? 'Pause' : 'Play'}
-            >
-              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
-            </button>
-            <button
-              type="button"
-              onClick={handleSkipNext}
-              className="p-1 text-zinc-400 hover:text-white transition"
-              title="Next"
-            >
-              <SkipForward className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </aside>
-      )}
-
-      {/* 2. Embedded Active YouTube Audio Frame (Always active, 100% audible) */}
+      {/* 1. Permanent Hidden Active YouTube Audio Engine */}
       {isPlaying && (
         <div className="fixed -bottom-96 -right-96 w-48 h-28 opacity-0 pointer-events-none overflow-hidden">
           <iframe
@@ -409,153 +505,670 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         </div>
       )}
 
-      {/* 3. Full Apple Music Liquid Glass Overlay Window */}
+      {/* 2. Docked Apple Floating Player Pill (Visible when modal is closed & music is playing) */}
+      {isPlaying && !isOpen && (
+        <aside
+          aria-label="Apple Music Bottom Controller"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-white/90 text-zinc-900 rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.12)] border border-zinc-200/80 px-5 py-2.5 flex items-center gap-6 transition-all animate-in fade-in slide-in-from-bottom-4 hover:shadow-[0_16px_40px_rgba(0,0,0,0.16)] select-none"
+        >
+          {/* Track Info */}
+          <div
+            onClick={onClose}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-zinc-200 shadow-2xs">
+              <img
+                src={currentTrack.coverUrl}
+                alt={currentTrack.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-semibold text-zinc-900 group-hover:text-rose-600 transition truncate max-w-[150px]">
+                {currentTrack.title}
+              </div>
+              <div className="text-[11px] text-zinc-500 truncate max-w-[150px]">
+                {currentTrack.artist}
+              </div>
+            </div>
+          </div>
+
+          {/* Scrubber Bar */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-mono text-zinc-400">
+              {formatSec(progressSec)}
+            </span>
+            <div className="w-40 bg-zinc-200 h-1 rounded-full overflow-hidden relative">
+              <div
+                className="bg-zinc-800 h-full rounded-full"
+                style={{ width: `${Math.min(100, (progressSec / 231) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-mono text-zinc-400">
+              {currentTrack.duration}
+            </span>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSkipPrev}
+              className="text-zinc-600 hover:text-zinc-900 transition"
+              title="Previous"
+            >
+              <SkipBack className="w-4 h-4 fill-current" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="w-7 h-7 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center transition shadow-2xs active:scale-95"
+              title={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
+            </button>
+            <button
+              type="button"
+              onClick={handleSkipNext}
+              className="text-zinc-600 hover:text-zinc-900 transition"
+              title="Next"
+            >
+              <SkipForward className="w-4 h-4 fill-current" />
+            </button>
+          </div>
+
+          {/* Like */}
+          <button
+            type="button"
+            onClick={() => toggleLike(currentTrack.id)}
+            className={`transition ${likedMap[currentTrack.id] ? 'text-rose-500' : 'text-zinc-400 hover:text-zinc-600'}`}
+          >
+            <Heart className={`w-4 h-4 ${likedMap[currentTrack.id] ? 'fill-current' : ''}`} />
+          </button>
+        </aside>
+      )}
+
+      {/* 3. Full Apple Music Light-Mode Studio Window (Matching Reference Image) */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 animate-in fade-in duration-150"
           onClick={onClose}
         >
-          {/* Main Apple Glass Container */}
           <div
-            className={`w-full ${
-              isGlassExpanded ? 'max-w-7xl h-[95vh]' : 'max-w-5xl h-[85vh]'
-            } backdrop-blur-3xl bg-zinc-950/80 text-zinc-100 rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-white/10 flex flex-col overflow-hidden relative transition-all duration-300`}
+            className="w-full max-w-6xl h-[92vh] bg-white text-zinc-900 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] border border-zinc-200/90 flex flex-col overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Ambient Reactive Colorful Backdrop Glow from Album Cover */}
-            <div
-              className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-25 blur-3xl pointer-events-none -z-10"
-              style={{
-                background: `radial-gradient(circle, #f43f5e 0%, #8b5cf6 50%, transparent 80%)`,
-              }}
-            />
-            <div
-              className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none -z-10"
-              style={{
-                background: `radial-gradient(circle, #06b6d4 0%, transparent 70%)`,
-              }}
-            />
+            {/* Top Navigation Bar matching Apple Music Reference */}
+            <header className="h-16 px-6 border-b border-zinc-100 flex items-center justify-between shrink-0 select-none bg-white">
+              {/* Left Controls: Sidebar toggle & History nav pill */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 flex items-center justify-center transition"
+                  title="Close Studio"
+                >
+                  <X className="w-4 h-4" />
+                </button>
 
-            {/* Apple Music Header / Playback Bar */}
-            <header className="h-18 px-5 border-b border-white/10 flex items-center justify-between shrink-0 select-none bg-zinc-950/40">
-              {/* Left Window Traffic Lights & Search */}
-              <div className="flex items-center gap-4 w-72">
-                <div className="flex items-center gap-1.5">
+                {/* Back / Forward Pill */}
+                <div className="flex items-center border border-zinc-200 rounded-lg p-0.5 bg-zinc-50/80">
                   <button
-                    onClick={onClose}
-                    className="w-3 h-3 rounded-full bg-rose-500/80 hover:bg-rose-500 transition"
-                    title="Close"
-                  />
+                    type="button"
+                    onClick={handleSkipPrev}
+                    className="p-1 hover:bg-white rounded text-zinc-400 hover:text-zinc-800 transition"
+                    title="Back"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <div className="w-px h-3 bg-zinc-200 mx-0.5" />
                   <button
-                    onClick={() => setIsGlassExpanded(!isGlassExpanded)}
-                    className="w-3 h-3 rounded-full bg-amber-500/80 hover:bg-amber-500 transition"
-                    title="Minimize"
-                  />
-                  <button
-                    onClick={() => setIsGlassExpanded(!isGlassExpanded)}
-                    className="w-3 h-3 rounded-full bg-emerald-500/80 hover:bg-emerald-500 transition"
-                    title="Maximize"
-                  />
-                </div>
-
-                {/* Apple Search Input */}
-                <div className="relative flex-1">
-                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search music, artists, albums"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-rose-500/60 focus:bg-white/10 transition"
-                  />
+                    type="button"
+                    onClick={handleSkipNext}
+                    className="p-1 hover:bg-white rounded text-zinc-400 hover:text-zinc-800 transition"
+                    title="Forward"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              {/* Center Apple Music Interactive LCD Scrubber */}
-              <div className="flex-1 max-w-lg flex flex-col items-center justify-center px-4">
-                {/* Playback Button Cluster */}
-                <div className="flex items-center gap-4 mb-1">
+              {/* Center Segmented Navigation Pill (Home, Flame, Sparkles, Library, Search) */}
+              <nav className="flex items-center border border-zinc-200 rounded-full p-1 bg-zinc-50/90 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('home');
+                    setSelectedPlaylist(null);
+                  }}
+                  className={`p-2 rounded-full transition ${
+                    activeTab === 'home' && !selectedPlaylist
+                      ? 'bg-zinc-900 text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                  }`}
+                  title="Listen Now / Home"
+                >
+                  <Home className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('moods');
+                    setSelectedPlaylist(null);
+                  }}
+                  className={`p-2 rounded-full transition ${
+                    activeTab === 'moods' && !selectedPlaylist
+                      ? 'bg-zinc-900 text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                  }`}
+                  title="Find Your Mood"
+                >
+                  <Flame className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('essentials');
+                    setSelectedPlaylist(null);
+                  }}
+                  className={`p-2 rounded-full transition ${
+                    activeTab === 'essentials' && !selectedPlaylist
+                      ? 'bg-zinc-900 text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                  }`}
+                  title="Essentials"
+                >
+                  <Sparkles className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('library');
+                    setSelectedPlaylist(null);
+                  }}
+                  className={`p-2 rounded-full transition ${
+                    activeTab === 'library' && !selectedPlaylist
+                      ? 'bg-zinc-900 text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                  }`}
+                  title="My Library & YouTube Playlists"
+                >
+                  <Library className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('search');
+                    setSelectedPlaylist(null);
+                  }}
+                  className={`p-2 rounded-full transition ${
+                    activeTab === 'search' && !selectedPlaylist
+                      ? 'bg-zinc-900 text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                  }`}
+                  title="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </nav>
+
+              {/* Right: YouTube Status Badge & Add URL */}
+              <div className="flex items-center gap-2.5">
+                {isLoadingYouTube ? (
+                  <span className="flex items-center gap-1.5 text-xs text-zinc-400">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Syncing...</span>
+                  </span>
+                ) : syncError ? (
                   <button
+                    type="button"
+                    onClick={() => youtubeService.connectYouTube()}
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition"
+                    title={syncError.message}
+                  >
+                    Authorize YouTube
+                  </button>
+                ) : isYouTubeConnected ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>YouTube Synced</span>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => youtubeService.connectYouTube()}
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 transition"
+                  >
+                    Sync Gmail
+                  </button>
+                )}
+              </div>
+            </header>
+
+            {/* Main Scrollable Stage */}
+            <main className="flex-1 overflow-y-auto px-8 py-6 space-y-10 pb-32">
+              {/* PLAYLIST DETAIL VIEW (If a user clicks on an imported playlist) */}
+              {selectedPlaylist ? (
+                <div className="space-y-6">
+                  <div className="flex items-end gap-6 p-6 rounded-2xl bg-zinc-50 border border-zinc-200">
+                    <div className="w-40 h-40 rounded-xl overflow-hidden shadow-md border border-zinc-200 shrink-0">
+                      <img
+                        src={selectedPlaylist.coverUrl}
+                        alt={selectedPlaylist.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-rose-600">
+                        Playlist • Apple Music & YouTube
+                      </span>
+                      <h1 className="text-2xl font-bold text-zinc-900">
+                        {selectedPlaylist.title}
+                      </h1>
+                      <p className="text-xs text-zinc-500 max-w-lg leading-relaxed">
+                        {selectedPlaylist.description}
+                      </p>
+                      <div className="flex items-center gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => handlePlayTrack(selectedPlaylist.tracks[0])}
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs transition active:scale-95 shadow-sm"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                          <span>Play All ({selectedPlaylist.tracksCount})</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Track Table */}
+                  <div className="space-y-1">
+                    <div className="grid grid-cols-12 text-[11px] font-bold text-zinc-400 uppercase px-4 py-2 border-b border-zinc-100">
+                      <span className="col-span-1">#</span>
+                      <span className="col-span-6">Title</span>
+                      <span className="col-span-3">Artist</span>
+                      <span className="col-span-2 text-right">Time</span>
+                    </div>
+
+                    {selectedPlaylist.tracks.map((track, i) => {
+                      const isCurrent = currentTrack.id === track.id;
+                      return (
+                        <div
+                          key={track.id}
+                          onClick={() => handlePlayTrack(track)}
+                          className={`grid grid-cols-12 items-center px-4 py-2.5 rounded-xl cursor-pointer transition group ${
+                            isCurrent
+                              ? 'bg-rose-50 text-rose-600 font-medium'
+                              : 'hover:bg-zinc-50 text-zinc-700'
+                          }`}
+                        >
+                          <span className="col-span-1 text-xs text-zinc-400">
+                            {i + 1}
+                          </span>
+                          <div className="col-span-6 flex items-center gap-3 min-w-0">
+                            <img
+                              src={track.coverUrl}
+                              alt={track.title}
+                              className="w-9 h-9 rounded-lg object-cover shrink-0 border border-zinc-200"
+                            />
+                            <span className="text-xs font-semibold truncate">
+                              {track.title}
+                            </span>
+                          </div>
+                          <span className="col-span-3 text-xs text-zinc-500 truncate">
+                            {track.artist}
+                          </span>
+                          <span className="col-span-2 text-right text-xs text-zinc-400 font-mono">
+                            {track.duration}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : activeTab === 'search' ? (
+                /* SEARCH VIEW */
+                <div className="space-y-6">
+                  <div className="max-w-xl">
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Search songs, artists, genres, or focus mood..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    {searchResults.map((t, i) => (
+                      <div
+                        key={t.id}
+                        onClick={() => handlePlayTrack(t)}
+                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-50 border border-transparent hover:border-zinc-200 transition cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-xs text-zinc-400 w-4 text-center">{i + 1}</span>
+                          <img src={t.coverUrl} alt={t.title} className="w-10 h-10 rounded-lg object-cover border border-zinc-200" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold text-zinc-900 truncate">{t.title}</div>
+                            <div className="text-[11px] text-zinc-500 truncate">{t.artist} • {t.genre}</div>
+                          </div>
+                        </div>
+                        <span className="text-xs text-zinc-400 font-mono">{t.duration}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* HOME VIEW / MOODS / ESSENTIALS (Strictly matches reference image) */
+                <>
+                  {/* SECTION 1: "Find Your Mood" matching the top row of reference */}
+                  <section className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-bold text-zinc-900 tracking-tight">
+                        Find Your Mood
+                      </h2>
+                      <span className="text-xs font-medium text-zinc-400">
+                        Curated for focus & flow
+                      </span>
+                    </div>
+
+                    {/* Cards Row: Energy, Love, Feel Good, Feeling Blue, Heartbreak, Relax, Focus */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                      {MOOD_CARDS.map((mood) => (
+                        <div
+                          key={mood.id}
+                          onClick={() => handlePlayTrack(mood.track)}
+                          className="group cursor-pointer flex flex-col space-y-2 select-none"
+                        >
+                          {/* Square Graphic Card */}
+                          <div
+                            className={`relative aspect-square rounded-2xl bg-gradient-to-br ${mood.gradient} p-4 flex flex-col justify-between overflow-hidden shadow-xs border border-zinc-200/60 group-hover:shadow-md transition`}
+                          >
+                            {/* Apple Music Brand in top-right */}
+                            <div className="flex justify-end">
+                              <span className="text-[9px] font-bold text-white/90 tracking-tight">
+                                Music
+                              </span>
+                            </div>
+
+                            {/* Centered Graphic Symbol */}
+                            <div className="my-auto flex items-center justify-center">
+                              {mood.icon}
+                            </div>
+
+                            {/* Hover Play Button */}
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-full bg-white text-zinc-900 flex items-center justify-center shadow-md">
+                                <Play className="w-4 h-4 fill-current ml-0.5" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Meta Text below card */}
+                          <div>
+                            <h3 className="text-xs font-bold text-zinc-900 leading-tight">
+                              {mood.title}
+                            </h3>
+                            <p className="text-[11px] text-zinc-500 leading-snug line-clamp-2 mt-0.5">
+                              {mood.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* SECTION 2: "Essentials" matching the second row of reference */}
+                  <section className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-bold text-zinc-900 tracking-tight">
+                        Essentials
+                      </h2>
+                      <span className="text-xs font-medium text-zinc-400">
+                        Top artists & studio collections
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                      {ESSENTIALS_LIST.map((ess) => (
+                        <div
+                          key={ess.id}
+                          onClick={() => handlePlayTrack(ess.track)}
+                          className="group cursor-pointer flex flex-col space-y-2 select-none"
+                        >
+                          {/* Album Art with "Essentials" Apple Banner */}
+                          <div className="relative aspect-square rounded-2xl overflow-hidden border border-zinc-200 shadow-xs group-hover:shadow-md transition">
+                            <img
+                              src={ess.coverUrl}
+                              alt={ess.title}
+                              className="w-full h-full object-cover"
+                            />
+
+                            {/* Apple Music "Essentials" Header Overlay */}
+                            <div className="absolute top-0 inset-x-0 bg-white/95 px-3 py-1.5 flex items-center justify-between border-b border-zinc-200/50">
+                              <span className="text-xs font-bold text-zinc-900 tracking-tight">
+                                Essentials
+                              </span>
+                              <span className="text-[9px] font-bold text-zinc-500">
+                                Music
+                              </span>
+                            </div>
+
+                            {/* Hover Play Button */}
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-full bg-white text-zinc-900 flex items-center justify-center shadow-md">
+                                <Play className="w-4 h-4 fill-current ml-0.5" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Title & Category */}
+                          <div>
+                            <h3 className="text-xs font-bold text-zinc-900 leading-tight truncate">
+                              {ess.title}
+                            </h3>
+                            <p className="text-[11px] text-zinc-500 mt-0.5 truncate">
+                              {ess.genre}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* SECTION 3: "My YouTube Playlists" / Liked Songs */}
+                  <section className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold text-zinc-900 tracking-tight">
+                          My YouTube Library
+                        </h2>
+                        {isYouTubeConnected && (
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            Synced with Gmail
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Add Custom Playlist Link */}
+                      <form onSubmit={handleCustomLink} className="flex items-center gap-2">
+                        <input
+                          type="url"
+                          placeholder="Paste YouTube playlist URL..."
+                          value={customLinkInput}
+                          onChange={(e) => setCustomLinkInput(e.target.value)}
+                          className="px-3 py-1 text-xs border border-zinc-200 rounded-lg bg-zinc-50 w-52 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                        />
+                        <button
+                          type="submit"
+                          className="px-3 py-1 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition"
+                        >
+                          Import
+                        </button>
+                      </form>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {userPlaylists.map((pl) => (
+                        <div
+                          key={pl.id}
+                          onClick={() => setSelectedPlaylist(pl)}
+                          className="p-3 rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/80 transition cursor-pointer flex flex-col group select-none"
+                        >
+                          <div className="relative aspect-square rounded-xl overflow-hidden border border-zinc-200 mb-2.5">
+                            <img
+                              src={pl.coverUrl}
+                              alt={pl.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <div className="w-9 h-9 rounded-full bg-white text-zinc-900 flex items-center justify-center shadow-md">
+                                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                              </div>
+                            </div>
+                          </div>
+                          <h3 className="text-xs font-bold text-zinc-900 truncate">
+                            {pl.title}
+                          </h3>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">
+                            {pl.tracksCount} tracks • YouTube Music
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </>
+              )}
+            </main>
+
+            {/* FLOATING BOTTOM CONTROLLER BAR (Matching Reference Image Exactly!) */}
+            <footer className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[92%] backdrop-blur-2xl bg-white/95 text-zinc-900 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.12)] border border-zinc-200/90 px-6 py-3 flex items-center justify-between select-none">
+              {/* Left Track Info */}
+              <div className="flex items-center gap-3 w-64 min-w-0">
+                <div className="w-10 h-10 rounded-lg overflow-hidden border border-zinc-200 shrink-0">
+                  <img
+                    src={currentTrack.coverUrl}
+                    alt={currentTrack.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold uppercase tracking-tight text-zinc-900 truncate">
+                    {currentTrack.title}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 truncate">
+                    {currentTrack.artist}
+                  </div>
+                </div>
+              </div>
+
+              {/* Center Scrubber & Main Playback Controls */}
+              <div className="flex-1 max-w-lg flex flex-col items-center justify-center px-4">
+                {/* Control Icons: Shuffle, Prev, Play, Next, Repeat */}
+                <div className="flex items-center gap-4 mb-1.5">
+                  <button
+                    type="button"
                     onClick={() => setIsShuffle(!isShuffle)}
-                    className={`transition ${isShuffle ? 'text-rose-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`transition ${isShuffle ? 'text-rose-600' : 'text-zinc-400 hover:text-zinc-700'}`}
                     title="Shuffle"
                   >
                     <Shuffle className="w-3.5 h-3.5" />
                   </button>
 
                   <button
+                    type="button"
                     onClick={handleSkipPrev}
-                    className="text-zinc-300 hover:text-white transition active:scale-95"
+                    className="text-zinc-700 hover:text-zinc-900 transition active:scale-95"
                     title="Previous"
                   >
-                    <SkipBack className="w-4 h-4" />
+                    <SkipBack className="w-4 h-4 fill-current" />
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setIsPlaying(!isPlaying)}
-                    className="w-8 h-8 rounded-full bg-white text-zinc-950 flex items-center justify-center transition hover:scale-105 active:scale-95 shadow-md"
+                    className="w-8 h-8 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center transition shadow-2xs active:scale-95"
                     title={isPlaying ? 'Pause' : 'Play'}
                   >
-                    {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                    {isPlaying ? (
+                      <Pause className="w-3.5 h-3.5 fill-current" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                    )}
                   </button>
 
                   <button
+                    type="button"
                     onClick={handleSkipNext}
-                    className="text-zinc-300 hover:text-white transition active:scale-95"
+                    className="text-zinc-700 hover:text-zinc-900 transition active:scale-95"
                     title="Next"
                   >
-                    <SkipForward className="w-4 h-4" />
+                    <SkipForward className="w-4 h-4 fill-current" />
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setIsRepeat(!isRepeat)}
-                    className={`transition ${isRepeat ? 'text-rose-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`transition ${isRepeat ? 'text-rose-600' : 'text-zinc-400 hover:text-zinc-700'}`}
                     title="Repeat"
                   >
                     <Repeat className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                {/* Apple LCD Screen & Progress Bar */}
-                <div className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-1 flex items-center gap-3">
-                  <div className="relative w-6 h-6 rounded-md overflow-hidden shrink-0 border border-white/10">
-                    <img src={currentTrack.coverUrl} alt="Art" className="w-full h-full object-cover" />
+                {/* Progress Timeline Scrubber */}
+                <div className="w-full flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-zinc-400 w-7 text-right">
+                    {formatSec(progressSec)}
+                  </span>
+                  <div className="flex-1 bg-zinc-200 h-1 rounded-full overflow-hidden relative cursor-pointer">
+                    <div
+                      className="bg-zinc-900 h-full rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(100, (progressSec / 231) * 100)}%` }}
+                    />
                   </div>
-
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    <div className="flex items-center justify-between text-[11px] font-medium leading-tight">
-                      <span className="text-zinc-100 font-semibold truncate max-w-[180px]">
-                        {currentTrack.title}
-                      </span>
-                      <span className="text-[10px] text-zinc-400 font-mono">
-                        {formatSec(progressSec)} / {currentTrack.duration}
-                      </span>
-                    </div>
-
-                    {/* Progress Track */}
-                    <div className="w-full bg-white/10 h-1 rounded-full mt-1 overflow-hidden relative cursor-pointer">
-                      <div
-                        className="bg-rose-500 h-full rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, (progressSec / 240) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => toggleLike(currentTrack.id)}
-                    className={`p-1 transition ${likedMap[currentTrack.id] ? 'text-rose-500' : 'text-zinc-500 hover:text-zinc-300'}`}
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${likedMap[currentTrack.id] ? 'fill-current' : ''}`} />
-                  </button>
+                  <span className="text-[10px] font-mono text-zinc-400 w-7">
+                    {currentTrack.duration}
+                  </span>
                 </div>
               </div>
 
-              {/* Right Controls: Volume & Expand */}
-              <div className="flex items-center gap-3 w-72 justify-end">
+              {/* Right Side Controls: Star, AirPlay, Volume, Queue */}
+              <div className="flex items-center gap-3 w-64 justify-end">
+                {/* Like / Star */}
+                <button
+                  type="button"
+                  onClick={() => toggleLike(currentTrack.id)}
+                  className={`p-1.5 transition ${likedMap[currentTrack.id] ? 'text-rose-500' : 'text-zinc-400 hover:text-zinc-700'}`}
+                  title="Favorite"
+                >
+                  <Heart className={`w-4 h-4 ${likedMap[currentTrack.id] ? 'fill-current' : ''}`} />
+                </button>
+
+                {/* Airplay */}
+                <button
+                  type="button"
+                  className="p-1.5 text-zinc-400 hover:text-zinc-700 transition"
+                  title="AirPlay"
+                >
+                  <Airplay className="w-4 h-4" />
+                </button>
+
+                {/* Volume Slider */}
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => setIsMuted(!isMuted)}
-                    className="text-zinc-400 hover:text-white transition"
+                    className="text-zinc-400 hover:text-zinc-700 transition"
                   >
                     {isMuted || volume === 0 ? (
                       <VolumeX className="w-4 h-4" />
@@ -574,594 +1187,21 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                       setVolume(Number(e.target.value));
                       setIsMuted(false);
                     }}
-                    className="w-20 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-rose-500"
+                    className="w-16 h-1 bg-zinc-200 rounded-full appearance-none cursor-pointer accent-zinc-900"
                   />
                 </div>
 
-                <div className="w-px h-5 bg-white/10 mx-1" />
-
+                {/* Queue / Lyrics Button */}
                 <button
-                  onClick={() => setIsGlassExpanded(!isGlassExpanded)}
-                  className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition"
-                  title={isGlassExpanded ? 'Exit full window' : 'Full window'}
+                  type="button"
+                  onClick={() => setActiveTab('library')}
+                  className="p-1.5 text-zinc-400 hover:text-zinc-700 transition"
+                  title="View Playlists & Queue"
                 >
-                  {isGlassExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                </button>
-
-                <button
-                  onClick={onClose}
-                  className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition"
-                  title="Close Studio"
-                >
-                  <X className="w-4 h-4" />
+                  <ListMusic className="w-4 h-4" />
                 </button>
               </div>
-            </header>
-
-            {/* Apple Music Main Layout: Sidebar + Main Content */}
-            <div className="flex-1 flex overflow-hidden">
-              {/* Apple Left Navigation Sidebar */}
-              <nav className="w-56 p-4 border-r border-white/10 flex flex-col justify-between shrink-0 bg-zinc-950/20 select-none">
-                <div className="space-y-6">
-                  {/* Category Header */}
-                  <div>
-                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider px-2 mb-2">
-                      Apple Music
-                    </div>
-                    <div className="space-y-1">
-                      <button
-                        onClick={() => {
-                          setActiveNav('listen-now');
-                          setSelectedPlaylist(null);
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition ${
-                          activeNav === 'listen-now' && !selectedPlaylist
-                            ? 'bg-rose-500 text-white shadow-sm'
-                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-                        }`}
-                      >
-                        <Compass className="w-4 h-4" />
-                        <span>Listen Now</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setActiveNav('browse');
-                          setSelectedPlaylist(null);
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition ${
-                          activeNav === 'browse' && !selectedPlaylist
-                            ? 'bg-rose-500 text-white shadow-sm'
-                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-                        }`}
-                      >
-                        <Flame className="w-4 h-4" />
-                        <span>Browse & Hits</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setActiveNav('radio');
-                          setSelectedPlaylist(null);
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition ${
-                          activeNav === 'radio' && !selectedPlaylist
-                            ? 'bg-rose-500 text-white shadow-sm'
-                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-                        }`}
-                      >
-                        <Radio className="w-4 h-4" />
-                        <span>Focus Radios</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* YouTube Music Connected Library */}
-                  <div>
-                    <div className="flex items-center justify-between px-2 mb-2">
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                        YouTube Music
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        {isLoadingYouTube && (
-                          <RefreshCw className="w-3 h-3 text-zinc-400 animate-spin" />
-                        )}
-                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-md border ${
-                          isYouTubeConnected
-                            ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                            : 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-                        }`}>
-                          {isYouTubeConnected ? 'Connected' : 'Offline'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      {/* Liked Songs Button */}
-                      <button
-                        onClick={() => {
-                          setActiveNav('liked');
-                          setSelectedPlaylist(null);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition text-left truncate ${
-                          activeNav === 'liked'
-                            ? 'bg-rose-500 text-white shadow-sm'
-                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <Heart className="w-3.5 h-3.5 text-rose-400 fill-current shrink-0" />
-                          <span className="truncate">Liked Songs</span>
-                        </div>
-                        <span className="text-[10px] opacity-75 shrink-0">
-                          {likedTracks.length}
-                        </span>
-                      </button>
-
-                      {userPlaylists.map((pl) => (
-                        <button
-                          key={pl.id}
-                          onClick={() => {
-                            setSelectedPlaylist(pl);
-                            setActiveNav('library');
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition text-left truncate ${
-                            selectedPlaylist?.id === pl.id
-                              ? 'bg-white/10 text-rose-400 border border-white/10'
-                              : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 truncate">
-                            <ListMusic className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate">{pl.title}</span>
-                          </div>
-                          <span className="text-[10px] text-zinc-500 shrink-0">
-                            {pl.tracksCount}
-                          </span>
-                        </button>
-                      ))}
-
-                      {syncError ? (
-                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 mt-2 text-left space-y-2">
-                          <p className="text-[11px] text-amber-200 leading-snug">
-                            {syncError.message}
-                          </p>
-                          {syncError.type === 'API_NOT_ENABLED' ? (
-                            <a
-                              href="https://console.cloud.google.com/apis/library/youtube.googleapis.com"
-                              target="_blank"
-                              rel="noreferrer"
-                              className="w-full py-1.5 px-2 bg-amber-500 hover:bg-amber-600 text-zinc-950 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-sm"
-                            >
-                              <span>Enable YouTube API ↗</span>
-                            </a>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => youtubeService.connectYouTube()}
-                              className="w-full py-1.5 px-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                            >
-                              <span>Grant Permission</span>
-                            </button>
-                          )}
-                        </div>
-                      ) : !isYouTubeConnected ? (
-                        <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 mt-2 text-left">
-                          <p className="text-[11px] text-zinc-300 leading-snug mb-2">
-                            Sign in with Google to retrieve your YouTube Music playlists & Liked Songs.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => youtubeService.connectYouTube()}
-                            className="w-full py-1.5 px-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                          >
-                            <span>Connect YouTube</span>
-                          </button>
-                        </div>
-                      ) : null}
-
-                      <button
-                        onClick={() => {
-                          setActiveNav('custom');
-                          setSelectedPlaylist(null);
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition mt-2 ${
-                          activeNav === 'custom'
-                            ? 'bg-rose-500 text-white'
-                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-                        }`}
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>Add YouTube Link</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Profile Badge */}
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs border border-rose-500/30">
-                    YM
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold text-zinc-200 truncate">
-                      YouTube Studio
-                    </div>
-                    <div className="text-[10px] text-zinc-400">High-Res Audio</div>
-                  </div>
-                </div>
-              </nav>
-
-              {/* Main Content Area */}
-              <main className="flex-1 overflow-y-auto p-6 space-y-6">
-                {/* 1. PLAYLIST VIEW (When user clicks any playlist from sidebar) */}
-                {selectedPlaylist ? (
-                  <div className="space-y-6">
-                    {/* Playlist Hero */}
-                    <div className="flex items-end gap-6 p-6 rounded-3xl bg-gradient-to-t from-white/5 to-transparent border border-white/10">
-                      <div className="w-44 h-44 rounded-2xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
-                        <img
-                          src={selectedPlaylist.coverUrl}
-                          alt={selectedPlaylist.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400">
-                          Playlist • YouTube Music
-                        </span>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">
-                          {selectedPlaylist.title}
-                        </h1>
-                        <p className="text-xs text-zinc-400 leading-relaxed max-w-xl">
-                          {selectedPlaylist.description}
-                        </p>
-                        <div className="flex items-center gap-3 pt-2">
-                          <button
-                            onClick={() => handlePlayTrack(selectedPlaylist.tracks[0])}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs transition shadow-lg active:scale-95"
-                          >
-                            <Play className="w-4 h-4 fill-current" />
-                            <span>Play All</span>
-                          </button>
-                          <span className="text-xs text-zinc-400">
-                            {selectedPlaylist.tracksCount} songs • Updated today
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Track List */}
-                    <div className="space-y-1">
-                      <div className="grid grid-cols-12 text-[11px] font-bold text-zinc-500 uppercase px-4 py-2 border-b border-white/10">
-                        <span className="col-span-1">#</span>
-                        <span className="col-span-6">Title</span>
-                        <span className="col-span-3">Album</span>
-                        <span className="col-span-2 text-right">Time</span>
-                      </div>
-
-                      {selectedPlaylist.tracks.map((track, i) => {
-                        const isCurrent = currentTrack.id === track.id;
-                        return (
-                          <div
-                            key={track.id}
-                            onClick={() => handlePlayTrack(track)}
-                            className={`grid grid-cols-12 items-center px-4 py-2.5 rounded-xl cursor-pointer transition group ${
-                              isCurrent
-                                ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                                : 'hover:bg-white/5 text-zinc-300'
-                            }`}
-                          >
-                            <span className="col-span-1 text-xs text-zinc-500 group-hover:text-white">
-                              {isCurrent && isPlaying ? (
-                                <Disc3 className="w-3.5 h-3.5 text-rose-400 animate-spin" />
-                              ) : (
-                                i + 1
-                              )}
-                            </span>
-                            <div className="col-span-6 flex items-center gap-3 min-w-0">
-                              <img
-                                src={track.coverUrl}
-                                alt={track.title}
-                                className="w-9 h-9 rounded-lg object-cover shrink-0 border border-white/10"
-                              />
-                              <div className="min-w-0">
-                                <div className={`text-xs font-semibold truncate ${isCurrent ? 'text-rose-400' : 'text-zinc-100 group-hover:text-white'}`}>
-                                  {track.title}
-                                </div>
-                                <div className="text-[11px] text-zinc-400 truncate">
-                                  {track.artist}
-                                </div>
-                              </div>
-                            </div>
-                            <span className="col-span-3 text-xs text-zinc-400 truncate">
-                              {track.album || track.genre}
-                            </span>
-                            <span className="col-span-2 text-right text-xs text-zinc-400 font-mono">
-                              {track.duration}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : activeNav === 'liked' ? (
-                  /* 2. LIKED SONGS VIEW (Apple Music Favorite Tracks) */
-                  <div className="space-y-6">
-                    {/* Hero Header */}
-                    <div className="flex items-end gap-6 p-6 rounded-3xl bg-gradient-to-t from-rose-950/40 via-purple-950/20 to-transparent border border-white/10">
-                      <div className="w-44 h-44 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-2xl border border-white/20 shrink-0">
-                        <Heart className="w-20 h-20 text-white fill-current" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400">
-                          Auto Playlist • YouTube Music
-                        </span>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">
-                          Liked Songs
-                        </h1>
-                        <p className="text-xs text-zinc-300 leading-relaxed max-w-xl">
-                          Your synchronized liked music and saved tracks from YouTube & YouTube Music.
-                        </p>
-                        <div className="flex items-center gap-3 pt-2">
-                          <button
-                            onClick={() => handlePlayTrack(likedTracks[0])}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs transition shadow-lg active:scale-95"
-                          >
-                            <Play className="w-4 h-4 fill-current" />
-                            <span>Play All ({likedTracks.length})</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={syncYouTubeData}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs text-zinc-300 font-medium transition"
-                          >
-                            <RefreshCw className={`w-3.5 h-3.5 ${isLoadingYouTube ? 'animate-spin' : ''}`} />
-                            <span>Refresh from YouTube</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Track Table */}
-                    <div className="space-y-1">
-                      <div className="grid grid-cols-12 text-[11px] font-bold text-zinc-500 uppercase px-4 py-2 border-b border-white/10">
-                        <span className="col-span-1">#</span>
-                        <span className="col-span-6">Title</span>
-                        <span className="col-span-3">Channel / Album</span>
-                        <span className="col-span-2 text-right">Time</span>
-                      </div>
-
-                      {likedTracks.map((track, i) => {
-                        const isCurrent = currentTrack.id === track.id;
-                        return (
-                          <div
-                            key={track.id}
-                            onClick={() => handlePlayTrack(track)}
-                            className={`grid grid-cols-12 items-center px-4 py-2.5 rounded-xl cursor-pointer transition group ${
-                              isCurrent
-                                ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                                : 'hover:bg-white/5 text-zinc-300'
-                            }`}
-                          >
-                            <span className="col-span-1 text-xs text-zinc-500 group-hover:text-white">
-                              {isCurrent && isPlaying ? (
-                                <Disc3 className="w-3.5 h-3.5 text-rose-400 animate-spin" />
-                              ) : (
-                                i + 1
-                              )}
-                            </span>
-                            <div className="col-span-6 flex items-center gap-3 min-w-0">
-                              <img
-                                src={track.coverUrl}
-                                alt={track.title}
-                                className="w-9 h-9 rounded-lg object-cover shrink-0 border border-white/10"
-                              />
-                              <div className="min-w-0">
-                                <div className={`text-xs font-semibold truncate ${isCurrent ? 'text-rose-400' : 'text-zinc-100 group-hover:text-white'}`}>
-                                  {track.title}
-                                </div>
-                                <div className="text-[11px] text-zinc-400 truncate">
-                                  {track.artist}
-                                </div>
-                              </div>
-                            </div>
-                            <span className="col-span-3 text-xs text-zinc-400 truncate">
-                              {track.album || track.genre}
-                            </span>
-                            <span className="col-span-2 text-right text-xs text-zinc-400 font-mono">
-                              {track.duration}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : activeNav === 'custom' ? (
-                  /* 2. CUSTOM YOUTUBE PASTE LINK */
-                  <div className="max-w-xl mx-auto py-8 space-y-4">
-                    <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30">
-                          <Plus className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h2 className="text-base font-bold text-white">
-                            Play Any YouTube or YouTube Music Link
-                          </h2>
-                          <p className="text-xs text-zinc-400">
-                            Paste any video, public playlist, or live radio stream URL
-                          </p>
-                        </div>
-                      </div>
-
-                      <form onSubmit={handleCustomLink} className="space-y-3 pt-2">
-                        <input
-                          type="url"
-                          placeholder="https://music.youtube.com/watch?v=... or playlist?list=..."
-                          value={customLinkInput}
-                          onChange={(e) => setCustomLinkInput(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/60"
-                        />
-                        <button
-                          type="submit"
-                          className="w-full py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition shadow-md"
-                        >
-                          Stream into Apple Glass Player
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                ) : (
-                  /* 3. DEFAULT LISTEN NOW / BROWSE / RADIO VIEW */
-                  <>
-                    {/* Big Hero Banner (Apple Music Style) */}
-                    <div className="relative rounded-3xl overflow-hidden p-8 border border-white/10 bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-zinc-950/40 shadow-xl flex items-center justify-between">
-                      <div className="max-w-lg space-y-3 z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] font-bold uppercase tracking-wider">
-                          <Sparkles className="w-3 h-3" /> Featured Flow
-                        </div>
-                        <h2 className="text-2xl font-bold text-white tracking-tight">
-                          Curated Deep Work Radios & YouTube Music Hits
-                        </h2>
-                        <p className="text-xs text-zinc-300 leading-relaxed">
-                          Pure high-fidelity streams formatted for long deep work sessions. No speech, no video ads, pure uninterrupted state.
-                        </p>
-                        <button
-                          onClick={() => handlePlayTrack(FEATURED_TRACKS[0])}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-zinc-100 text-zinc-950 font-semibold text-xs shadow-lg transition active:scale-95"
-                        >
-                          <Play className="w-4 h-4 fill-current" />
-                          <span>Start Lofi Radio</span>
-                        </button>
-                      </div>
-
-                      {/* Right 3D Visualizer Art */}
-                      <div className="relative w-48 h-48 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shrink-0 hidden md:block">
-                        <img
-                          src={currentTrack.coverUrl}
-                          alt="Cover Art"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      </div>
-                    </div>
-
-                    {/* Apple Curated Playlists Carousel Grid */}
-                    <section className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-bold text-zinc-100">
-                          Focus Playlists on YouTube Music
-                        </h3>
-                        <span className="text-xs text-zinc-400">Updated Daily</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {CURATED_PLAYLISTS.map((pl) => (
-                          <div
-                            key={pl.id}
-                            onClick={() => {
-                              setSelectedPlaylist(pl);
-                              setActiveNav('library');
-                            }}
-                            className="group p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-rose-500/40 hover:bg-white/10 transition cursor-pointer flex flex-col"
-                          >
-                            <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 mb-2.5 shadow-md">
-                              <img
-                                src={pl.coverUrl}
-                                alt={pl.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                              />
-                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <div className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg">
-                                  <Play className="w-4 h-4 fill-current ml-0.5" />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="text-xs font-bold text-zinc-100 truncate group-hover:text-rose-400 transition">
-                              {pl.title}
-                            </div>
-                            <div className="text-[11px] text-zinc-400 truncate mt-0.5">
-                              {pl.tracksCount} tracks
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-
-                    {/* Top Focus Tracks Table */}
-                    <section className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-bold text-zinc-100">
-                          Top Stations & Radios
-                        </h3>
-                        <span className="text-xs text-zinc-400">
-                          {displayedTracks.length} streams available
-                        </span>
-                      </div>
-
-                      <div className="space-y-1">
-                        {displayedTracks.map((track, i) => {
-                          const isCurrent = currentTrack.id === track.id;
-                          return (
-                            <div
-                              key={track.id}
-                              onClick={() => handlePlayTrack(track)}
-                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition cursor-pointer group ${
-                                isCurrent
-                                  ? 'border-rose-500/40 bg-rose-500/10 text-rose-300'
-                                  : 'border-white/5 hover:border-white/10 hover:bg-white/5 text-zinc-300'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-xs text-zinc-500 w-4 text-center">
-                                  {isCurrent && isPlaying ? (
-                                    <Disc3 className="w-3.5 h-3.5 text-rose-400 animate-spin" />
-                                  ) : (
-                                    i + 1
-                                  )}
-                                </span>
-                                <img
-                                  src={track.coverUrl}
-                                  alt={track.title}
-                                  className="w-10 h-10 rounded-xl object-cover shrink-0 border border-white/10"
-                                />
-                                <div className="min-w-0">
-                                  <div className={`text-xs font-semibold truncate ${isCurrent ? 'text-rose-400' : 'text-zinc-100 group-hover:text-white'}`}>
-                                    {track.title}
-                                  </div>
-                                  <div className="text-[11px] text-zinc-400 truncate">
-                                    {track.artist} • <span className="text-zinc-500">{track.genre}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-4 shrink-0 pl-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleLike(track.id);
-                                  }}
-                                  className={`p-1 transition ${likedMap[track.id] ? 'text-rose-500' : 'text-zinc-500 hover:text-zinc-300'}`}
-                                >
-                                  <Heart className={`w-3.5 h-3.5 ${likedMap[track.id] ? 'fill-current' : ''}`} />
-                                </button>
-                                <span className="text-xs text-zinc-400 font-mono">
-                                  {track.duration}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  </>
-                )}
-              </main>
-            </div>
+            </footer>
           </div>
         </div>
       )}
